@@ -91,6 +91,8 @@ public class HtmlGenerator implements Closeable {
 
     protected Stack<IObject> nestedObjects = new Stack<>();
 
+    protected static boolean isHeading = false;
+
     /**
      * Creates a new HtmlGenerator for the specified PDF file.
      *
@@ -143,7 +145,7 @@ public class HtmlGenerator implements Closeable {
 
     protected void writeStyleTag() throws IOException {
         htmlWriter.write("<style>\n");
-        htmlWriter.write(String.format(HtmlSyntax.HTML_STYLE_TAG_ENTRY_OPENING, "ul, p, h1, h2, h3, h4, h5, h6, table, figcaption, img, li"));
+        htmlWriter.write(String.format(HtmlSyntax.HTML_STYLE_TAG_ENTRY_OPENING, "ul, p, h1, h2, h3, h4, h5, h6, table, figcaption, img, li, figure"));
         htmlWriter.write(String.format(HtmlSyntax.HTML_STYLE_TAG_ENTRY_VALUE, HtmlSyntax.HTML_POSITION_ABSOLUTE_PROPERTY));
         htmlWriter.write(String.format(HtmlSyntax.HTML_STYLE_TAG_ENTRY_VALUE, HtmlSyntax.HTML_ZERO_MARGIN_PROPERTY));
         htmlWriter.write(String.format(HtmlSyntax.HTML_STYLE_TAG_ENTRY_VALUE, HtmlSyntax.HTML_LINE_HEIGHT_PROPERTY));
@@ -465,12 +467,14 @@ public class HtmlGenerator implements Closeable {
      * @throws IOException if unable to write to the output
      */
     protected void writeHeading(SemanticHeading heading) throws IOException {
+        isHeading = true;
         int headingLevel = Math.min(6, Math.max(1, heading.getHeadingLevel()));
         String styleAttribute = String.format(HtmlSyntax.HTML_STYLE_ATTRIBUTE, getTextNodeStyle(heading).trim());
         htmlWriter.write("<h" + headingLevel + styleAttribute + ">");
         htmlWriter.write(getCorrectString(GeneratorUtils.getTextFromTextNode(heading, OutputType.HTML)));
         htmlWriter.write("</h" + headingLevel + ">");
         htmlWriter.write(HtmlSyntax.HTML_LINE_BREAK);
+        isHeading = false;
     }
 
     private void writeCellTag(TableBorderCell cell, boolean isHeader) throws IOException {
@@ -580,7 +584,7 @@ public class HtmlGenerator implements Closeable {
             style.append(HtmlSyntax.HTML_ITALIC_STYLE_PROPERTY);
         }
         double fontSizeInPx = convertPtToPx(chunk.getFontSize());
-        if (!NodeUtils.areCloseNumbers(fontSizeInPx, 16.0)) {
+        if (!NodeUtils.areCloseNumbers(fontSizeInPx, 16.0) || isHeading) {
             style.append(String.format(HtmlSyntax.HTML_FONT_SIZE_PROPERTY, fontSizeInPx));
         }
         Color color = chunk.getTextColor();
