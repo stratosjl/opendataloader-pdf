@@ -1,6 +1,7 @@
 package org.opendataloader.pdf.utils;
 
 import org.opendataloader.pdf.html.HtmlGenerator;
+import org.opendataloader.pdf.html.HtmlSyntax;
 import org.opendataloader.pdf.markdown.MarkdownGenerator;
 import org.verapdf.wcag.algorithms.entities.SemanticTextNode;
 import org.verapdf.wcag.algorithms.entities.content.TextBlock;
@@ -33,12 +34,14 @@ public class GeneratorUtils {
             switch (outputType) {
                 case MD:
                     MarkdownGenerator.getTextFromLineForMarkdown(line,  stringBuilder);
+                    TextChunkUtils.formatLineEnd(stringBuilder);
                     break;
                 case HTML:
                     HtmlGenerator.getTextFromLineForHTML(line, stringBuilder);
+                    //For now, we are always using line breaks
+                    stringBuilder.append(HtmlSyntax.HTML_LINE_BREAK_TAG);
                     break;
             }
-            TextChunkUtils.formatLineEnd(stringBuilder);
         }
         switch (outputType) {
             case MD:
